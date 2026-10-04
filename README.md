@@ -2,14 +2,15 @@
 
 A minimal Fathom-inspired app focused on the experience after a meeting, built with Next.js, TypeScript, React, and Tailwind CSS.
 
-## Current build: step 4 — meeting interactions
+## Current build: search and grounded Ask
 
-- `/` reads meetings, attendees, and transcript segments from Supabase on the server, newest first, with participant initials and transcript line counts. Local search matches titles, participants, and transcript text.
+- `/` reads meetings, attendees, and transcript segments from Supabase on the server, newest first, with participant initials and transcript line counts. Search keeps title/participant matching local and queries Postgres transcript text through `/api/search` after a 300 ms pause. Matching meetings show a source line and timestamp. Searches are limited to 200 characters; `%`, `_`, and backslash are treated literally.
 - `/meetings/[id]` has Summary and Transcript tabs with local transcript search and a speaker filter. Desktop shows meeting details alongside the transcript; mobile uses a Details tab. Timestamp links navigate to passages.
 - Summary shows saved TL;DR and Decisions / Key points sections, or a Generate summary button with loading and error states. Action items and chapters appear in Details. Unassigned tasks show Needs owner.
 - Timestamp buttons open Transcript, clear its filters, scroll to the matching passage, and highlight it for two seconds. Timestamps within summary text are clickable too; jumping to a time between lines selects the preceding line.
 - Action-item checkboxes persist completion through `PATCH /api/action-items/[id]`. Each transcript line has a Highlight button that saves its text as an annotation through `POST /api/meetings/[id]/annotations`. Saved annotations appear beside the meeting and on transcript lines, including after reload. Both routes validate input and use Supabase only on the server.
 - Supabase reads run at request time. The application does not import the seed JSON or connect to Supabase during builds.
+- The docked **Ask a question** panel is a conversation: earlier questions and replies remain in the scrolling thread while the page is open, including through Collapse. Three suggestions appear only in an empty thread; **New chat** clears it. Questions carry their scope label, and replies show source chips or a clear explanation when the supplied transcript does not answer the question.
 
 ## Database setup
 
@@ -50,14 +51,30 @@ Before generation, expect `duration_seconds = 2880`, `attendees = 8`, `transcrip
 
 1. Paste the entire updated `supabase/schema.sql` into the Supabase SQL editor and click **Run**. Rerunning it preserves existing data and adds generation claim columns plus three service-role-only functions for claiming, saving, and releasing generation.
 2. The server environment must contain `GEMINI_API_KEY` and `GEMINI_MODEL`, as well as the two Supabase variables. Restart the dev server after configuring them yourself; never prefix secrets with `NEXT_PUBLIC_`. The code reads the model from the environment without logging it.
-3. Run `npm run dev` in one terminal. In another, run `npm run generate`. It lists meetings without summaries, calls the app's POST `/api/meetings/[id]/summarize` endpoint sequentially, and pauses 1.5 seconds between requests. It defaults to `http://localhost:3000`; for another port use `npm run generate -- http://localhost:3001`. It logs only failures, sets a failing exit code if any request fails, and skips saved summaries on reruns.
+3. Run `npm run dev` in one terminal. In another, run `npm run generate`. It lists meetings without summaries, calls the app's POST `/api/meetings/[id]/summarize` endpoint sequentially, and pauses 1.5 seconds between requests. It defaults to `http://localhost:3000`; for another port use `npm run generate -- http://localhost:3001`. It continues after failures, prints the failed meeting IDs at the end, sets a failing exit code if any request fails, and skips saved summaries on reruns.
 4. Alternatively, open a meeting and click **Generate summary**. Refresh after generation to confirm persistence. A second POST returns the saved result without calling Gemini again.
 
-Gemini REST requests use a manually constructed Gemini-compatible `responseSchema` with uppercase types and nullable assignees, with a 75-second timeout. Zod independently validates the returned JSON before saving. Invalid or incomplete JSON, incorrect summary sections, repeated bullet text, unknown owners, invented timestamps, or invalid chapter counts/order are rejected before saving. Long calls (at least 30 minutes and 30 transcript lines) receive 3–8 chapters; short excerpts receive 1–2. Summary rendering uses escaped text and plain bullet sections, without raw HTML or an additional Markdown dependency. [Gemini structured output documentation](https://ai.google.dev/gemini-api/docs/structured-output).
+Gemini REST requests use a manually constructed Gemini-compatible `responseSchema` with uppercase types and nullable assignees. Summary and Ask share one server-only helper: an initial attempt plus up to three retries for HTTP 503, HTTP 429, and network/timeout failures, waiting 2, 5, and 10 seconds. If `GEMINI_FALLBACK_MODEL` is set, it tries that model once after primary failure. Attempts allow up to 75 seconds, with shorter timeouts when needed to reserve the waits and five seconds per remaining attempt within an approximately 107-second overall AI budget and the 120-second route allowance. Final AI failures show “The AI service is busy right now. Please try again in a minute.” with Retry controls; upstream bodies, keys, and model settings are never logged.
+
+Zod independently validates returned JSON before saving or rendering. Invalid or incomplete JSON, incorrect summary sections, repeated bullet text, unknown owners, invented timestamps, or invalid chapter counts/order are rejected before saving. Long calls (at least 30 minutes and 30 transcript lines) receive 3–8 chapters; short excerpts receive 1–2. Summary rendering uses escaped text and plain bullet sections, without raw HTML or an additional Markdown dependency. [Gemini structured output documentation](https://ai.google.dev/gemini-api/docs/structured-output).
 
 Database claims serialize generation for a meeting. A busy request returns HTTP 409; failed requests release their claim, and claims abandoned by a stopped process expire after three minutes. Saving uses one database transaction for the summary, action items, and chapters, so a failed insert leaves no partial generated output. Gemini calls run only in the server route; the batch script never sends credentials to the app. The endpoint has a 120-second runtime allowance, which the deployment plan must support. In Vercel, configure the same server environment variable names and redeploy.
 
 Run `npm install`, then `npm run dev` and open http://localhost:3000. Verify with `npm run lint` and `npm run build`.
+
+## Ask setup and behavior
+
+1. In the Supabase SQL editor, paste the entire contents of `supabase/ask-usage.sql` and click **Run**, after the base schema has been applied. It adds `ask_usage` and an atomic `consume_ask_request` function. RLS is enabled with no anonymous policies; only the service role can access the counter or call the function. Rerunning the SQL preserves usage.
+2. Run or restart `npm run dev`. Existing Supabase and Gemini settings are reused. `GEMINI_FALLBACK_MODEL` is optional. `ASK_DAILY_LIMIT` is optional and defaults to 50 when absent or blank; configured limits must be integers from 1 to 10000. No new dependencies are required.
+3. Open a meeting, click **Ask a question**, select its scope, and ask a question of 3–500 characters. The composer starts at one line and grows to about four. Enter sends; Shift+Enter adds a line. Sending clears and disables the input while a Thinking bubble waits for the reply. Errors appear in that reply with Retry, which keeps the original question and scope. Click a citation chip to verify the source; citations in other meetings open `/meetings/[id]?t=<seconds>`. Ordinary meeting visits still open Summary; timestamp links open Transcript and highlight the source line.
+
+The cap is shared across the unauthenticated demo and resets at midnight UTC. Valid requests consume one slot, including no-match answers and failed AI calls; invalid inputs and missing meetings do not. Internal Gemini retries consume no additional slots. Concurrent requests cannot exceed the cap because Postgres increments the counter conditionally in one statement. No question text is stored in the usage table.
+
+**This meeting** loads every transcript line in chronological order, with its speaker and timestamp. The supplied lines are capped at 64000 serialized JSON characters; longer transcripts are trimmed and each reply visibly reports that its context was trimmed. The full long seed meeting fits this limit. **All meetings** extracts up to eight stemmed keywords, removes common words, and matches any keyword using ordinary case-insensitive Postgres substring matching. It reads matching pages before ranking by keyword overlap, then supplies the top 16 lines, capped at 1500 text characters per line and 16000 serialized JSON characters total. Trimming is reported. Different wording can change all-meeting results; a missing answer does not prove that omitted or unmatched passages lack it.
+
+The most recent three successful question/reply pairs, including scope labels, are sent as conversation context for follow-ups. They are never factual evidence: answers must rely solely on the supplied transcript lines. History stays in page memory and is cleared by New chat or navigation away, not stored in Supabase or browser storage. New chat is disabled during a pending reply. The thread announces new messages through an accessible live log and scrolls its own container, keeping the meeting page in place.
+
+No embeddings, summaries, or action items are supplied as evidence. Model citations must reference line IDs actually sent; duplicate or invented references and supported answers with no citations are rejected. Meeting titles, speakers, and timestamps come from the retrieved database rows. The schema checks citation identity and output shape; the prompt constrains factual claims, which users can verify in the source passages.
 
 ## Product decisions
 
@@ -67,18 +84,18 @@ Run `npm install`, then `npm run dev` and open http://localhost:3000. Verify wit
 - Cut live meeting bots and recording to focus on reviewing existing transcripts. Timestamp buttons scroll to text instead of playing audio.
 - Cut calendar sync because meeting capture is outside this assignment's scope.
 - Omit authentication as requested; this is a shared demo dataset.
-- Persist fictional seed data in Supabase and read it server-side; keep search and transcript filtering local for this small library. Defer database search and Q&A to subsequent build steps.
+- Persist fictional seed data in Supabase and read it server-side; use ordinary Postgres text matching for library transcripts and Ask retrieval, while retaining local transcript filters and title/participant search.
 - Generate real summaries, action items, and chapters on demand; persist task completion and transcript highlights without adding annotation editing.
 - Cut Team Calls, Deals, and CRM sync because this one-day build focuses on the core meeting review experience.
-- Keep Ask for questions that arise while reading a meeting. Its planned answers must cite transcript moments, plainly state when information is absent, and address only the question asked. Ask is not implemented in step 4.
+- Keep Ask docked beside meeting review for questions that arise while reading. Use a retained conversation with suggestions only before the first message and a compact composer, so Ask feels like a conversation instead of a review form. Require source citations, plainly acknowledge insufficient evidence, and answer only the question asked.
 - Use a single teal accent and one system font, with a list-based library and mobile section tabs for reviewing meetings on narrow screens.
 - Use system fonts so the initial deployment does not require downloading fonts at build time.
 
-## Remaining approved backend plan (not implemented)
+## Server data and security
 
 The schema includes meetings, attendees, transcript_segments, summaries (with `tldr`, `template_name`, and `markdown`), action_items, annotations, and chapters. Seed imports write only meetings, attendees, and transcript segments. Generated summaries, action items, and chapters are persisted and read separately by the meeting page.
 
-Ask requests will have a persistent, shared daily cap configured by `ASK_DAILY_LIMIT` so anonymous callers cannot bypass a per-user quota. The numeric limit will be set when this endpoint is built.
+Ask requests have a persistent, shared daily cap configured by `ASK_DAILY_LIMIT` so anonymous callers cannot bypass a per-user quota. The default is 50.
 
 Use Supabase only on the server, with RLS denying direct anonymous access. The data module uses Next.js's `server-only` boundary; a shared client factory is used by the server module and seed command, with session persistence disabled. The service role key must never be sent to the client or logged. `.env.example` lists variable names with empty values; real local secrets belong only in `.env.local`.
 

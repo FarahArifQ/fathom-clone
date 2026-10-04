@@ -26,7 +26,7 @@ export default function MeetingSummaryPanel({ summary, generating, error, onGene
           <h2 className="text-lg font-semibold">No summary yet</h2>
           <p className="mt-3 text-sm leading-7 text-slate-600">Generate a summary, action items, and chapters from this meeting&apos;s transcript.</p>
           <button disabled={generating} onClick={onGenerate} className="mt-5 min-h-11 rounded-lg bg-teal-800 px-5 text-sm font-medium text-white hover:bg-teal-900 disabled:cursor-wait disabled:opacity-70">
-            {generating ? "Generating summary…" : "Generate summary"}
+            {generating ? "Generating summary…" : error ? "Retry" : "Generate summary"}
           </button>
           {generating && <p role="status" className="mt-3 text-sm text-slate-600">Reading the transcript and preparing your meeting notes…</p>}
         </>

@@ -10,21 +10,26 @@ async function generate() {
     .select("id,summaries(id)").order("date");
   if (error) throw new Error("Unable to list meetings. Check the Supabase setup.");
   const pending = (data ?? []).filter((meeting) => !meeting.summaries.length);
+  const failed = new Set();
   for (const [index, meeting] of pending.entries()) {
     try {
       const response = await fetch(new URL(`/api/meetings/${encodeURIComponent(meeting.id)}/summarize`, base), {
         method: "POST", signal: AbortSignal.timeout(115_000),
       });
       if (!response.ok) {
-        console.error(`Summary request failed for ${meeting.id} (HTTP ${response.status}). Check the app's server error message and rerun to retry.`);
-        process.exitCode = 1;
+        console.error(`Summary request failed for ${meeting.id}. Continuing to the next meeting.`);
+        failed.add(meeting.id);
       }
       await response.body?.cancel();
     } catch {
-      console.error(`Unable to complete summary request for ${meeting.id}. Ensure the app is running; rerun to retry.`);
-      process.exitCode = 1;
+      console.error(`Unable to complete summary request for ${meeting.id}. Continuing to the next meeting.`);
+      failed.add(meeting.id);
     }
     if (index < pending.length - 1) await pause(1500);
+  }
+  if (failed.size) {
+    console.error(`Failed meetings: ${[...failed].join(", ")}. Rerun npm run generate to retry.`);
+    process.exitCode = 1;
   }
 }
 

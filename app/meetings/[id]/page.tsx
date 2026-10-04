@@ -13,14 +13,16 @@ export async function generateMetadata({ params }: PageProps<"/meetings/[id]">):
   return { title: meeting?.title ?? "Meeting not found" };
 }
 
-export default async function MeetingPage({ params }: PageProps<"/meetings/[id]">) {
+export default async function MeetingPage({ params, searchParams }: PageProps<"/meetings/[id]">) {
   const { id } = await params;
   const [meeting] = await getMeetings(id);
   if (!meeting) notFound();
   const [summary, annotations] = await Promise.all([getSavedSummary(id), getAnnotations(id)]);
+  const { t } = await searchParams;
+  const seconds = typeof t === "string" && /^\d{1,6}$/.test(t) ? Number(t) : undefined;
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-5 py-8 sm:px-8 sm:py-10">
+    <main className="mx-auto w-full max-w-6xl px-5 pt-8 pb-28 sm:px-8 sm:pt-10">
       <Link href="/" className="inline-flex min-h-11 items-center text-sm font-medium text-teal-800">← Back to library</Link>
       <p className="mt-3 mb-7 text-xs leading-6 text-slate-600">{meeting.isSeed && "Seed demo · Fictional meeting · Transcript excerpt · "}No recording available</p>
       <header className="mb-8">
@@ -31,7 +33,7 @@ export default async function MeetingPage({ params }: PageProps<"/meetings/[id]"
           <span>{meeting.durationMinutes} min</span>
         </div>
       </header>
-      <MeetingWorkspace key={meeting.id} meeting={meeting} initialSummary={summary} initialAnnotations={annotations} />
+      <MeetingWorkspace key={`${meeting.id}:${seconds ?? "summary"}`} meeting={meeting} initialSummary={summary} initialAnnotations={annotations} initialSeconds={seconds} />
     </main>
   );
 }

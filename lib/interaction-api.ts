@@ -11,10 +11,10 @@ export async function readInput<T extends z.ZodType>(request: Request, schema: T
   return parsed.data;
 }
 
-export async function interactionResponse(work: () => Promise<unknown>) {
+export async function interactionResponse(work: () => Promise<unknown>, message = "Unable to save the change. Please retry.") {
   try { return Response.json(await work()); }
   catch (error) {
-    const failure = error instanceof RequestError ? error : new RequestError("Unable to save the change. Please retry.");
+    const failure = error instanceof RequestError ? error : new RequestError(message);
     console.error(failure.message);
     return Response.json({ error: failure.message }, { status: failure.status });
   }

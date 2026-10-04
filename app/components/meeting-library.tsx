@@ -5,20 +5,26 @@ import { useState } from "react";
 import { formatMeetingDate, type Meeting } from "@/lib/meetings";
 import ParticipantAvatar from "./participant-avatar";
 import SearchField from "./search-field";
+import { useTranscriptSearch } from "./use-transcript-search";
+import TranscriptCitation from "./transcript-citation";
 
 export default function MeetingLibrary({ meetings }: { meetings: Meeting[] }) {
   const [query, setQuery] = useState("");
   const term = query.trim().toLowerCase();
+  const search = useTranscriptSearch(query);
+  const matches = new Map(search.matches.slice().reverse().map((line) => [line.meeting_id, line]));
   const results = meetings.filter((meeting) =>
-    [meeting.title, ...meeting.participants, ...meeting.transcript.map((line) => line.text)]
-      .some((text) => text.toLowerCase().includes(term)),
+    [meeting.title, ...meeting.participants].some((text) => text.toLowerCase().includes(term)) || matches.has(meeting.id),
   ).sort((a, b) => b.date.localeCompare(a.date));
 
   return (
     <section aria-label="Meeting library">
-      <SearchField label="Search by title, participant, or transcript text" value={query} onChange={setQuery} />
+      <SearchField label="Search by title, participant, or transcript text" value={query} onChange={setQuery} maxLength={200} />
+      {search.error && <div role="alert" className="mt-4 rounded-lg border border-slate-300 bg-white p-4 text-sm">
+        <p>{search.error}</p><button type="button" onClick={search.retry} className="mt-2 min-h-11 rounded px-3 font-medium text-teal-800 hover:bg-teal-50">Retry search</button>
+      </div>}
       <div className="mt-6 mb-3 flex items-center justify-between text-xs text-slate-600">
-        <p role="status">{results.length} {results.length === 1 ? "meeting" : "meetings"}{term && " found"}</p>
+        <p role="status">{search.pending ? "Searching transcripts…" : `${results.length} ${results.length === 1 ? "meeting" : "meetings"}${term ? " found" : ""}`}</p>
         <span>Newest first</span>
       </div>
       {results.length ? (
@@ -42,10 +48,14 @@ export default function MeetingLibrary({ meetings }: { meetings: Meeting[] }) {
                   <span aria-hidden="true" className="text-xl text-teal-800">↗</span>
                 </div>
               </Link>
+              {matches.get(meeting.id) && <div className="border-t border-slate-100 px-5 pb-5 sm:px-7">
+                <TranscriptCitation citation={matches.get(meeting.id)!} />
+                <p className="mt-1 line-clamp-3 text-sm leading-6 break-words text-slate-700">{matches.get(meeting.id)!.text}</p>
+              </div>}
             </li>
           ))}
         </ul>
-      ) : (
+      ) : search.pending || search.error ? null : (
         <div className="rounded-xl border border-slate-200 bg-white px-6 py-14 text-center">
           <h2 className="text-lg font-semibold">{term ? "No meetings found" : "No meetings yet"}</h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">{term ? "Try another title, participant name, or phrase from a transcript." : "Your meeting library is empty."}</p>

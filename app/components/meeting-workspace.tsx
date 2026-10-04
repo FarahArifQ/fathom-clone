@@ -10,16 +10,19 @@ import MeetingInsights from "./meeting-insights";
 import { useMeetingSummary } from "./use-meeting-summary";
 import { useMeetingInteractions } from "./use-meeting-interactions";
 import MeetingAnnotations from "./meeting-annotations";
+import MeetingAsk from "./meeting-ask";
 
 const tabs = ["Summary", "Transcript", "Details"] as const;
 type Tab = typeof tabs[number];
 
-export default function MeetingWorkspace({ meeting, initialSummary, initialAnnotations }: {
+export default function MeetingWorkspace({ meeting, initialSummary, initialAnnotations, initialSeconds }: {
   meeting: Meeting; initialSummary: SavedSummary | null; initialAnnotations: Annotation[];
+  initialSeconds?: number;
 }) {
-  const [active, setActive] = useState<Tab>("Summary");
-  const [contentTab, setContentTab] = useState<"Summary" | "Transcript">("Summary");
-  const [target, setTarget] = useState<{ seconds: number; visit: number } | null>(null);
+  const initialLine = initialSeconds === undefined ? undefined : meeting.transcript.findLast((line) => line.startSeconds <= initialSeconds);
+  const [active, setActive] = useState<Tab>(initialLine ? "Transcript" : "Summary");
+  const [contentTab, setContentTab] = useState<"Summary" | "Transcript">(initialLine ? "Transcript" : "Summary");
+  const [target, setTarget] = useState<{ seconds: number; visit: number } | null>(initialLine ? { seconds: initialLine.startSeconds, visit: 1 } : null);
   const { summary, generating, error, generate, updateAction } = useMeetingSummary(meeting.id, initialSummary);
   const interactions = useMeetingInteractions(meeting.id, initialAnnotations, updateAction);
 
@@ -88,6 +91,7 @@ export default function MeetingWorkspace({ meeting, initialSummary, initialAnnot
         <MeetingInsights summary={summary} onJump={jumpToTranscript} pending={interactions.pending} onComplete={interactions.completeAction} />
         <MeetingAnnotations annotations={interactions.annotations} onJump={jumpToTranscript} />
       </aside>
+      <MeetingAsk meetingId={meeting.id} onJump={jumpToTranscript} />
     </div>
   );
 }
