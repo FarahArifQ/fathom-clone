@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import MeetingWorkspace from "@/app/components/meeting-workspace";
 import { formatMeetingDate } from "@/lib/meetings";
 import { getMeetings } from "@/lib/supabase";
+import { getSavedSummary } from "@/lib/summary-store";
 
 export async function generateMetadata({ params }: PageProps<"/meetings/[id]">): Promise<Metadata> {
   const { id } = await params;
@@ -15,6 +16,7 @@ export default async function MeetingPage({ params }: PageProps<"/meetings/[id]"
   const { id } = await params;
   const [meeting] = await getMeetings(id);
   if (!meeting) notFound();
+  const summary = await getSavedSummary(id);
 
   return (
     <main className="mx-auto w-full max-w-6xl px-5 py-8 sm:px-8 sm:py-10">
@@ -28,7 +30,7 @@ export default async function MeetingPage({ params }: PageProps<"/meetings/[id]"
           <span>{meeting.durationMinutes} min</span>
         </div>
       </header>
-      <MeetingWorkspace key={meeting.id} meeting={meeting} />
+      <MeetingWorkspace key={meeting.id} meeting={meeting} initialSummary={summary} />
     </main>
   );
 }

@@ -1,13 +1,19 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { formatTimestamp, type Meeting } from "@/lib/meetings";
 import SearchField from "./search-field";
 
-export default function MeetingTranscript({ meeting }: { meeting: Meeting }) {
+export default function MeetingTranscript({ meeting, targetSeconds }: { meeting: Meeting; targetSeconds?: number }) {
   const [query, setQuery] = useState("");
   const [speaker, setSpeaker] = useState("");
   const speakerId = useId();
+  useEffect(() => {
+    if (targetSeconds === undefined) return;
+    const element = document.getElementById(`t-${targetSeconds}`);
+    element?.scrollIntoView({ block: "center" });
+    element?.focus({ preventScroll: true });
+  }, [targetSeconds]);
   const speakers = [...new Set(meeting.transcript.map((line) => line.speaker))];
   const results = meeting.transcript.filter((line) =>
     (!speaker || line.speaker === speaker) && line.text.toLowerCase().includes(query.trim().toLowerCase()),
@@ -33,7 +39,7 @@ export default function MeetingTranscript({ meeting }: { meeting: Meeting }) {
           const seconds = segment.startSeconds;
           const timestamp = formatTimestamp(seconds);
           return (
-            <li key={seconds} id={`t-${seconds}`} className="scroll-mt-6 py-6 target:bg-teal-50">
+            <li key={seconds} id={`t-${seconds}`} tabIndex={-1} className="scroll-mt-6 py-6 target:bg-teal-50 focus:bg-teal-50">
               <div className="mb-2 flex items-center justify-between gap-3">
                 <span className="text-sm font-semibold text-slate-900">{segment.speaker}</span>
                 <a href={`#t-${seconds}`} aria-label={`Jump to ${timestamp}`} className="inline-flex min-h-8 items-center rounded px-2 text-xs text-teal-800 tabular-nums hover:bg-teal-50">{timestamp}</a>

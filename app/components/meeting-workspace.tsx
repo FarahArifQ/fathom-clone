@@ -5,13 +5,19 @@ import { type Meeting } from "@/lib/meetings";
 import EmptyPanel from "./empty-panel";
 import MeetingTranscript from "./meeting-transcript";
 import ParticipantAvatar from "./participant-avatar";
+import type { MeetingSummary } from "@/lib/summary-schema";
+import MeetingSummaryPanel from "./meeting-summary";
+import MeetingInsights from "./meeting-insights";
+import { useMeetingSummary } from "./use-meeting-summary";
 
 const tabs = ["Summary", "Transcript", "Details"] as const;
 type Tab = typeof tabs[number];
 
-export default function MeetingWorkspace({ meeting }: { meeting: Meeting }) {
+export default function MeetingWorkspace({ meeting, initialSummary }: { meeting: Meeting; initialSummary: MeetingSummary | null }) {
   const [active, setActive] = useState<Tab>("Summary");
   const [contentTab, setContentTab] = useState<"Summary" | "Transcript">("Summary");
+  const [target, setTarget] = useState<{ seconds: number; visit: number } | null>(null);
+  const { summary, generating, error, generate } = useMeetingSummary(meeting.id, initialSummary);
 
   useEffect(() => {
     const desktop = window.matchMedia("(min-width: 1024px)");
@@ -25,6 +31,11 @@ export default function MeetingWorkspace({ meeting }: { meeting: Meeting }) {
   function selectTab(tab: Tab) {
     setActive(tab);
     if (tab !== "Details") setContentTab(tab);
+  }
+
+  function jumpToTranscript(seconds: number) {
+    selectTab("Transcript");
+    setTarget((current) => ({ seconds, visit: (current?.visit ?? 0) + 1 }));
   }
 
   function navigateTabs(event: KeyboardEvent<HTMLDivElement>) {
@@ -52,10 +63,10 @@ export default function MeetingWorkspace({ meeting }: { meeting: Meeting }) {
         </div>
         <div className={`${active === "Details" ? "hidden lg:block" : ""} overflow-hidden rounded-xl border border-slate-200 bg-white`}>
           <div id="panel-Summary" role="tabpanel" aria-labelledby="tab-Summary" tabIndex={0} hidden={contentTab !== "Summary"}>
-            <EmptyPanel title="Summary" description="No summary yet. AI generation is not connected in this seed demo." />
+            <MeetingSummaryPanel summary={summary} generating={generating} error={error} onGenerate={generate} />
           </div>
           <div id="panel-Transcript" role="tabpanel" aria-labelledby="tab-Transcript" tabIndex={0} hidden={contentTab !== "Transcript"}>
-            <MeetingTranscript meeting={meeting} />
+            <MeetingTranscript key={target?.visit ?? 0} meeting={meeting} targetSeconds={target?.seconds} />
           </div>
         </div>
       </div>
@@ -66,7 +77,7 @@ export default function MeetingWorkspace({ meeting }: { meeting: Meeting }) {
             {meeting.participants.map((name) => <li key={name} className="flex items-center gap-3 text-sm text-slate-700"><ParticipantAvatar name={name} /><span>{name}</span></li>)}
           </ul>
         </header>
-        <EmptyPanel title="Action items" description="No action items yet. Tasks will appear after AI generation is connected." />
+        <MeetingInsights summary={summary} onJump={jumpToTranscript} />
         <EmptyPanel title="Annotations" description="No annotations yet. Notes and highlights are not connected in this seed demo." />
       </aside>
     </div>
