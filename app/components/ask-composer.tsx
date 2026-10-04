@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef } from "react";
+import { Button } from "./ui";
 
 export default function AskComposer({ value, onChange, onSend, pending, open }: {
   value: string; onChange: (value: string) => void; onSend: () => void; pending: boolean; open: boolean;
@@ -21,7 +22,7 @@ export default function AskComposer({ value, onChange, onSend, pending, open }: 
     if (!pending && value.trim().length >= 3) onSend();
   }
   return (
-    <form onSubmit={(event) => { event.preventDefault(); send(); }} className="shrink-0 border-t border-slate-200 px-3 pt-3 pb-2">
+    <form onSubmit={(event) => { event.preventDefault(); send(); }} className="shrink-0 border-t border-border px-3 pt-3 pb-2">
       <label htmlFor={id} className="sr-only">Your question</label>
       <p id={`${id}-keys`} className="sr-only">Enter sends. Shift+Enter adds a new line.</p>
       <div className="flex items-end gap-2">
@@ -29,11 +30,10 @@ export default function AskComposer({ value, onChange, onSend, pending, open }: 
           maxLength={500} minLength={3} required disabled={pending} aria-describedby={`${id}-keys ${id}-count`}
           onKeyDown={(event) => {
             if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); send(); }
-          }} className="min-h-10 max-h-28 min-w-0 flex-1 resize-none rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm leading-6 disabled:bg-slate-50" />
-        <button type="submit" disabled={pending || value.trim().length < 3}
-          className="min-h-10 shrink-0 rounded-lg bg-teal-800 px-3 text-sm font-medium text-white hover:bg-teal-900 disabled:cursor-default disabled:opacity-60">Send</button>
+          }} className="min-h-10 max-h-28 min-w-0 flex-1 resize-none rounded-lg border border-border-strong bg-surface px-3 py-2 text-base leading-6 disabled:bg-surface-raised" />
+        <Button type="submit" disabled={pending || value.trim().length < 3} className="shrink-0">Send</Button>
       </div>
-      <p id={`${id}-count`} className="mt-1 text-right text-[10px] text-slate-500">{value.length}/500</p>
+      <p id={`${id}-count`} className="mt-1 text-right text-meta text-muted">{value.length}/500</p>
     </form>
   );
 }

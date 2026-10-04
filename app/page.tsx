@@ -1,17 +1,29 @@
 import MeetingLibrary from "@/app/components/meeting-library";
+import LibrarySkeleton from "@/app/components/library-skeleton";
+import Icon from "@/app/components/ui-icon";
+import { Suspense } from "react";
 import { getMeetings } from "@/lib/supabase";
 
-export default async function Home() {
-  const meetings = await getMeetings();
+async function LibraryContent() {
+  let meetings: Awaited<ReturnType<typeof getMeetings>> = [];
+  let loadError = false;
+  try {
+    meetings = await getMeetings();
+  } catch {
+    loadError = true;
+  }
+  return <MeetingLibrary meetings={meetings} loadError={loadError} />;
+}
+
+export default function Home() {
   return (
-    <main className="mx-auto w-full max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
-      <header className="mb-9">
-        <p className="mb-3 text-xs font-semibold tracking-[0.18em] text-teal-800 uppercase">After the conversation</p>
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Meeting library</h1>
-        <p className="mt-3 text-base leading-7 text-slate-600">Find a conversation. Revisit the details.</p>
-        <p className="mt-5 text-xs leading-6 text-slate-600">{meetings.some((meeting) => meeting.isSeed) && "Seed demo: fictional meetings with transcript excerpts. "}No recordings or live capture.</p>
+    <main className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-8 sm:py-12">
+      <header className="mb-8">
+        <h1>Meeting library</h1>
+        <p className="mt-3 max-w-2xl text-secondary">Revisit conversations, find what was said, and turn meeting notes into next steps.</p>
+        <p className="mt-4 flex items-start gap-2 text-meta font-medium text-muted"><Icon name="info" className="mt-0.5 size-4 shrink-0" />Fictional seed meetings with transcript excerpts. No recordings or live capture.</p>
       </header>
-      <MeetingLibrary meetings={meetings} />
+      <Suspense fallback={<LibrarySkeleton controls />}><LibraryContent /></Suspense>
     </main>
   );
 }

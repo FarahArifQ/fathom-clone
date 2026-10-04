@@ -1,15 +1,142 @@
 @import "tailwindcss";
 
+:root {
+  --page: #0a0c11;
+  --surface: #121721;
+  --surface-raised: #1c2432;
+  --foreground: #f2f5fa;
+  --secondary: #b8c3d4;
+  --meta: #a1afc3;
+  --accent: #3b9eff;
+  --accent-hover: #69b6ff;
+  --on-accent: #08121f;
+  --accent-soft: #162c43;
+  --success: #83deb3;
+  --success-soft: #17332b;
+  --warning: #f4cd80;
+  --warning-soft: #332b1d;
+  --danger: #ff9b9b;
+  --border: #303b4d;
+  --border-strong: #65758d;
+  --glass: rgb(255 255 255 / 6%);
+  --glass-border: rgb(255 255 255 / 10%);
+  --glow: rgb(59 158 255 / 8%);
+  --shadow-panel: 0 8px 32px rgb(0 0 0 / 16%);
+  --shadow-glass: inset 0 1px 0 rgb(255 255 255 / 5%), 0 8px 32px rgb(0 0 0 / 20%);
+  --radius-control: 8px;
+  --radius-panel: 16px;
+}
+
 @theme inline {
-  --font-sans: Arial, Helvetica, sans-serif;
+  --font-sans: var(--font-inter), Arial, Helvetica, sans-serif;
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-foreground: var(--foreground);
+  --color-secondary: var(--secondary);
+  --color-muted: var(--meta);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-on-accent: var(--on-accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --radius-sm: var(--radius-control);
+  --radius-lg: var(--radius-control);
+  --radius-xl: var(--radius-panel);
+  --shadow-sm: var(--shadow-panel);
+  --shadow-lg: var(--shadow-panel);
+  --text-xs: 13px;
+  --text-sm: 16px;
+  --text-base: 16px;
+  --text-base--line-height: 1.6;
+  --text-meta: 13px;
+  --text-meta--line-height: 1.5;
+  --text-lg: 20px;
+  --text-xl: 20px;
+  --text-3xl: 32px;
+  --text-4xl: 32px;
 }
 
 @layer base {
+  html { color-scheme: dark; }
   body {
-    @apply bg-stone-50 font-sans text-slate-900;
+    @apply bg-page font-sans text-base text-foreground;
+    background-image: radial-gradient(ellipse 70% 440px at 50% 0, var(--glow), transparent);
+    background-repeat: no-repeat;
   }
+  h1, h2, h3 { @apply font-semibold tracking-tight; }
+  h1 { @apply text-3xl leading-tight; }
+  h2 { @apply text-xl leading-snug; }
+  button, a, input, select, textarea {
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 180ms, border-color 180ms, color 180ms;
+  }
+  button:not(:disabled), select { cursor: pointer; }
+  :is(a, button, input, select, textarea, [tabindex]):focus-visible,
+  :is(input, select, textarea):focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+  :is(time, input[type="number"]) { font-variant-numeric: tabular-nums; }
+  ::selection { background: var(--accent-soft); color: var(--foreground); }
+}
 
-  :is(a, button, input, select, [tabindex]):focus-visible {
-    @apply rounded outline-2 outline-offset-4 outline-teal-700;
+@layer components {
+  .glass {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: var(--shadow-glass);
   }
+  .button {
+    @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-4 py-2 text-meta font-semibold;
+  }
+  .button-primary { @apply bg-accent text-on-accent hover:bg-accent-hover; }
+  .button-secondary { @apply border border-border-strong bg-surface-raised text-foreground hover:border-accent; }
+  .button-ghost { @apply text-accent hover:bg-accent-soft; }
+  .button:disabled { @apply cursor-default border-border bg-surface-raised text-secondary; }
+  .panel { @apply rounded-xl border border-border bg-surface; box-shadow: var(--shadow-panel); }
+  .tag { @apply inline-flex items-center rounded-lg border px-2 py-1 text-meta font-medium; }
+  .tag-accent { @apply border-accent/40 bg-accent-soft text-accent; }
+  .tag-neutral { @apply border-border bg-surface-raised text-secondary; }
+  .tag-success { @apply border-success/40 bg-success-soft text-success; }
+  .tag-warning { @apply border-warning/40 bg-warning-soft text-warning; }
+  .timestamp-chip {
+    @apply inline-flex min-h-10 shrink-0 items-center gap-2 rounded-lg border border-accent/40 bg-accent-soft px-3 py-1 text-meta font-medium text-accent tabular-nums hover:border-accent;
+  }
+  .tabs { @apply flex gap-4 border-b border-border; }
+  .tab {
+    @apply min-h-12 border-b-2 border-transparent px-2 text-meta font-semibold tracking-wide text-secondary uppercase hover:text-foreground;
+  }
+  .tab[aria-selected="true"] { @apply border-accent text-accent; }
+  .skeleton { @apply rounded-lg bg-surface-raised; }
+  .meeting-card {
+    @apply relative isolate rounded-xl border border-border bg-surface;
+    transition: border-color 180ms, background-color 180ms;
+  }
+  .meeting-card:hover, .meeting-card:focus-within { @apply border-accent/70 bg-surface-raised; }
+  .meeting-card-title::after { content: ""; position: absolute; inset: 0; border-radius: var(--radius-panel); }
+  .meeting-card-title:focus-visible { outline: none; }
+  .meeting-card-title:focus-visible::after { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .search-input { @apply h-14 w-full rounded-lg border border-border-strong bg-surface px-12 text-base text-foreground; }
+  .search-input:focus-visible { @apply border-accent; }
+  .skip-link { @apply sr-only; }
+  .skip-link:focus { @apply fixed top-3 left-3 z-50 w-auto rounded-lg bg-surface-raised p-4 text-foreground; clip: auto; height: auto; }
+}
+
+@supports not ((backdrop-filter: blur(16px)) or (-webkit-backdrop-filter: blur(16px))) {
+  .glass { background: var(--surface-raised); border-color: var(--border); }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass { background: var(--surface-raised); border-color: var(--border); backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0s !important; animation: none !important; scroll-behavior: auto !important; }
 }

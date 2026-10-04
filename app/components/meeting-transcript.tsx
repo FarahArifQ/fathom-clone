@@ -6,6 +6,7 @@ import type { Annotation } from "@/lib/interaction-schema";
 import SearchField from "./search-field";
 import TimestampButton from "./timestamp-button";
 import TranscriptText from "./transcript-text";
+import { Tag } from "./ui";
 
 export default function MeetingTranscript({ meeting, targetSeconds, annotations, pending, onHighlight, onJump }: {
   meeting: Meeting; targetSeconds?: number; annotations: Annotation[]; pending: Set<string>;
@@ -46,22 +47,22 @@ export default function MeetingTranscript({ meeting, targetSeconds, annotations,
 
   return (
     <section aria-label="Transcript">
-      <div className="border-b border-slate-200 p-5 sm:p-7">
+      <div className="border-b border-border p-5 sm:p-7">
         <div className="flex flex-col gap-4 xl:flex-row">
           <SearchField label="Search transcript" value={query} onChange={setQuery} />
           <div className="min-w-0 xl:w-48">
-            <label htmlFor={speakerId} className="mb-2 block text-sm font-medium text-slate-700">Speaker</label>
-            <select id={speakerId} value={speaker} onChange={(event) => setSpeaker(event.target.value)} className="h-12 w-full rounded-lg border border-slate-300 bg-white px-3 text-base text-slate-900">
+            <label htmlFor={speakerId} className="mb-2 block text-meta font-medium text-secondary">Speaker</label>
+            <select id={speakerId} value={speaker} onChange={(event) => setSpeaker(event.target.value)} className="h-14 w-full rounded-lg border border-border-strong bg-surface px-3 text-base text-foreground">
               <option value="">All speakers</option>
               {speakers.map((name) => <option key={name} value={name}>{name}</option>)}
             </select>
           </div>
         </div>
         <div className="mt-4 flex items-center justify-between gap-3">
-          <p role="status" className="text-xs text-slate-600">Showing {results.length} of {meeting.transcript.length} lines</p>
+          <p role="status" className="text-meta text-secondary">Showing {results.length} of {meeting.transcript.length} lines</p>
           <button type="button" aria-expanded={expanded} aria-controls={transcriptId}
             onClick={() => { setExpanded(!expanded); setShowBackToTop(false); }}
-            className="min-h-11 rounded-lg px-3 text-sm font-medium text-teal-800 hover:bg-teal-50">
+            className="min-h-11 rounded-lg px-3 text-base font-medium text-accent hover:bg-accent-soft">
             {expanded ? "Collapse" : "Expand"}
           </button>
         </div>
@@ -76,12 +77,12 @@ export default function MeetingTranscript({ meeting, targetSeconds, annotations,
             else viewport.current?.scrollTo({ top: 0 });
             viewport.current?.focus({ preventScroll: true });
             setShowBackToTop(false);
-          }} className="mt-2 min-h-11 rounded-lg border border-slate-300 bg-white px-3 text-sm font-medium text-teal-800 shadow-sm hover:bg-teal-50">
+          }} className="mt-2 min-h-11 rounded-lg border border-border-strong bg-surface px-3 text-base font-medium text-accent shadow-sm hover:bg-accent-soft">
             Back to top
           </button>
         </div>
       )}
-      <ol className="divide-y divide-slate-100 px-5 sm:px-7">
+      <ol className="divide-y divide-border px-5 sm:px-7">
         {meeting.transcript.map((segment) => {
           const seconds = segment.startSeconds;
           const notes = annotations.filter((annotation) => annotation.timestamp_seconds === seconds);
@@ -89,22 +90,22 @@ export default function MeetingTranscript({ meeting, targetSeconds, annotations,
           const saving = pending.has(`highlight:${seconds}`);
           return (
             <li key={`${seconds}-${segment.speaker}`} id={`t-${seconds}`} tabIndex={-1} hidden={!visibleLines.has(segment)}
-              className={`scroll-mt-6 py-6 transition-colors ${flashing && seconds === targetSeconds ? "bg-teal-100" : ""}`}>
+              className={`scroll-mt-6 py-6 ${flashing && seconds === targetSeconds ? "bg-accent-soft" : ""}`}>
               <div className="mb-2 flex items-center justify-between gap-3">
-                <span className="text-sm font-semibold text-slate-900">{segment.speaker}</span>
+                <span className="text-base font-semibold text-foreground">{segment.speaker}</span>
                 <TimestampButton seconds={seconds} onJump={onJump} />
               </div>
-              <p className="text-sm leading-7 text-slate-700"><TranscriptText text={segment.text} onJump={onJump} /></p>
-              <div className="mt-3 flex flex-wrap items-center gap-3 text-xs">
+              <p className="text-base leading-7 text-secondary"><TranscriptText text={segment.text} onJump={onJump} /></p>
+              <div className="mt-3 flex flex-wrap items-center gap-3 text-meta">
                 <button type="button" onClick={() => onHighlight(segment)} disabled={highlighted || saving}
                   aria-label={`${highlighted ? "Highlighted" : "Highlight"} ${segment.speaker}'s transcript line`}
-                  className="min-h-9 rounded px-2 font-medium text-teal-800 hover:bg-teal-50 disabled:cursor-default disabled:text-slate-600">
+                  className="min-h-10 rounded-lg px-2 font-medium text-accent hover:bg-accent-soft disabled:cursor-default disabled:text-secondary">
                   {saving ? "Saving highlight…" : highlighted ? "Highlighted" : "Highlight"}
                 </button>
-                {highlighted && <span role="status" className="rounded border border-teal-700 bg-teal-50 px-2 py-1 font-medium text-teal-900">Saved highlight</span>}
+                {highlighted && <span role="status"><Tag tone="success">Saved highlight</Tag></span>}
               </div>
               {notes.filter((note) => note.type !== "highlight" || note.note !== segment.text).map((note) => (
-                <p key={note.id} className="mt-3 border-l-2 border-teal-700 pl-3 text-sm leading-7 text-slate-700">
+                <p key={note.id} className="mt-3 border-l-2 border-accent pl-3 text-base leading-7 text-secondary">
                   <span className="font-medium capitalize">{note.type}: </span><TranscriptText text={note.note} onJump={onJump} />
                 </p>
               ))}
@@ -115,11 +116,11 @@ export default function MeetingTranscript({ meeting, targetSeconds, annotations,
       {!results.length && (
         <div className="px-5 py-12 text-center">
           <h2 className="font-semibold">No matching transcript lines</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">Try a different phrase or choose another speaker.</p>
-          <button onClick={() => { setQuery(""); setSpeaker(""); }} className="mt-4 min-h-11 rounded-lg px-4 text-sm font-medium text-teal-800 hover:bg-teal-50">Clear filters</button>
+          <p className="mt-2 text-base leading-6 text-secondary">Try a different phrase or choose another speaker.</p>
+          <button onClick={() => { setQuery(""); setSpeaker(""); }} className="mt-4 min-h-11 rounded-lg px-4 text-base font-medium text-accent hover:bg-accent-soft">Clear filters</button>
         </div>
       )}
-      <p className="border-t border-slate-100 px-5 py-5 text-xs leading-6 text-slate-600 sm:px-7">This excerpt covers part of the {meeting.durationMinutes}-minute seed meeting. Timestamps link to text.</p>
+      <p className="border-t border-border px-5 py-5 text-meta leading-6 text-secondary sm:px-7">This excerpt covers part of the {meeting.durationMinutes}-minute seed meeting. Timestamps link to text.</p>
       </div>
     </section>
   );

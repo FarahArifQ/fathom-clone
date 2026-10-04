@@ -7,8 +7,8 @@ export default function TranscriptCitation({ citation, currentMeetingId, onJump,
   compact?: boolean;
 }) {
   const label = `${citation.meeting_title} · ${citation.speaker} · ${formatTimestamp(citation.timestamp_seconds)}`;
-  const content = compact && currentMeetingId === citation.meeting_id ? `${citation.speaker} · ${formatTimestamp(citation.timestamp_seconds)}` : label;
-  const className = `inline-flex items-center px-2 py-1 text-left text-xs leading-5 font-medium text-teal-800 hover:bg-teal-50 ${compact ? "min-h-8 rounded-full border border-teal-200 bg-white" : "min-h-11 rounded"}`;
+  const content = compact ? `${citation.speaker} · ${formatTimestamp(citation.timestamp_seconds)}` : label;
+  const className = "timestamp-chip relative z-10 max-w-full break-words text-left";
   return currentMeetingId === citation.meeting_id && onJump ? (
     <button type="button" className={className} aria-label={`Go to ${label}`} onClick={() => onJump(citation.timestamp_seconds)}>{content}</button>
   ) : (

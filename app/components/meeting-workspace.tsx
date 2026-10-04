@@ -11,6 +11,7 @@ import { useMeetingSummary } from "./use-meeting-summary";
 import { useMeetingInteractions } from "./use-meeting-interactions";
 import MeetingAnnotations from "./meeting-annotations";
 import MeetingAsk from "./meeting-ask";
+import { Tabs } from "./ui";
 
 const tabs = ["Summary", "Transcript", "Details"] as const;
 type Tab = typeof tabs[number];
@@ -61,17 +62,17 @@ export default function MeetingWorkspace({ meeting, initialSummary, initialAnnot
 
   return (
     <div className="grid items-start gap-7 lg:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)]">
-      {interactions.error && <p role="alert" className="rounded-lg border border-slate-300 bg-stone-50 p-4 text-sm leading-6 lg:col-span-2">{interactions.error}</p>}
+      {interactions.error && <p role="alert" className="rounded-lg border border-border-strong bg-surface-raised p-4 text-base leading-6 lg:col-span-2">{interactions.error}</p>}
       <div className="min-w-0">
-        <div role="tablist" aria-label="Meeting sections" onKeyDown={navigateTabs} className="mb-5 flex gap-1 rounded-xl border border-slate-200 bg-white p-1.5">
+        <Tabs aria-label="Meeting sections" onKeyDown={navigateTabs} className="mb-5">
           {tabs.map((tab) => (
             <button key={tab} id={`tab-${tab}`} role="tab" aria-selected={active === tab} aria-controls={`panel-${tab}`} tabIndex={active === tab ? 0 : -1} onClick={() => selectTab(tab)}
-              className={`min-h-11 flex-1 rounded-lg px-3 text-sm font-medium transition-colors ${tab === "Details" ? "lg:hidden" : ""} ${active === tab ? "bg-teal-800 text-white" : "text-slate-600 hover:bg-slate-100"}`}>
+              className={`tab flex-1 ${tab === "Details" ? "lg:hidden" : ""}`}>
               {tab}
             </button>
           ))}
-        </div>
-        <div className={`${active === "Details" ? "hidden lg:block" : ""} overflow-clip rounded-xl border border-slate-200 bg-white`}>
+        </Tabs>
+        <div className={`${active === "Details" ? "hidden lg:block" : ""} overflow-clip rounded-xl border border-border bg-surface`}>
           <div id="panel-Summary" role="tabpanel" aria-labelledby="tab-Summary" tabIndex={0} hidden={contentTab !== "Summary"}>
             <MeetingSummaryPanel summary={summary} generating={generating} error={error} onGenerate={generate} onJump={jumpToTranscript} />
           </div>
@@ -82,10 +83,10 @@ export default function MeetingWorkspace({ meeting, initialSummary, initialAnnot
         </div>
       </div>
       <aside id="panel-Details" role="tabpanel" aria-labelledby="tab-Details" tabIndex={0} className={`${active !== "Details" ? "hidden lg:block" : ""} min-w-0 space-y-6`}>
-        <header className="rounded-xl border border-slate-200 bg-white p-5 sm:p-7">
-          <h2 className="mb-4 text-xs font-semibold tracking-wider text-slate-600 uppercase">Attendees · {meeting.participants.length}</h2>
+        <header className="glass rounded-xl p-5 sm:p-7">
+          <h2 className="mb-4">Attendees · {meeting.participants.length}</h2>
           <ul className="space-y-3">
-            {meeting.participants.map((name) => <li key={name} className="flex items-center gap-3 text-sm text-slate-700"><ParticipantAvatar name={name} /><span>{name}</span></li>)}
+            {meeting.participants.map((name) => <li key={name} className="flex items-center gap-3 text-base text-secondary"><ParticipantAvatar name={name} /><span>{name}</span></li>)}
           </ul>
         </header>
         <MeetingInsights summary={summary} onJump={jumpToTranscript} pending={interactions.pending} onComplete={interactions.completeAction} />

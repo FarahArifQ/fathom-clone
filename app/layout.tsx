@@ -1,30 +1,23 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Inter } from "next/font/google";
+import AppHeader from "./components/app-header";
 import "./globals.css";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 
 export const metadata: Metadata = {
   title: { default: "Meeting Notes", template: "%s | Meeting Notes" },
-  description: "A Fathom-inspired meeting library with fictional seed transcript excerpts.",
+  description: "Find your meetings, revisit the transcript, and turn conversations into clear notes and next steps. Fictional seed meetings for this demo.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en" className={`${inter.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
-        <a href="#content" className="sr-only focus:not-sr-only focus:bg-white focus:p-4">Skip to content</a>
-        <header className="border-b border-slate-200 bg-white">
-          <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-5 sm:px-8">
-            <Link href="/" className="flex items-center gap-3 font-semibold tracking-tight">
-              <span aria-hidden="true" className="flex size-9 items-center justify-center rounded-xl bg-teal-800 text-lg text-white">m</span>
-              Meeting Notes
-            </Link>
-            <nav aria-label="Main navigation" className="flex items-center gap-5 text-sm">
-              <Link href="/" className="font-medium text-teal-800">Library</Link>
-            </nav>
-          </div>
-        </header>
+        <a href="#content" className="skip-link">Skip to content</a>
+        <AppHeader />
         <div id="content" className="flex flex-1 flex-col">{children}</div>
-        <footer className="mx-auto w-full max-w-6xl px-5 py-6 text-xs text-slate-500 sm:px-8">Built around the conversation. Inspired by Fathom.</footer>
+        <footer className="mx-auto w-full max-w-6xl border-t border-border px-4 py-6 text-meta font-medium text-muted sm:px-8">Meeting Notes · Transcript review, summaries and next steps.</footer>
       </body>
     </html>
   );
