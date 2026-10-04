@@ -1,0 +1,99 @@
+{
+  "_note": "SEED DATA: fictional meetings written for demo purposes only. All names, companies, and numbers are made up.",
+  "meetings": [
+    {
+      "id": "m1",
+      "title": "Sprint Planning: Northwind Mobile App",
+      "type": "internal",
+      "date": "2026-09-14",
+      "durationMinutes": 32,
+      "participants": ["Maya Chen", "Daniel Okafor", "Sara Lindqvist"],
+      "transcript": [
+        { "t": "00:00", "speaker": "Maya Chen", "text": "Okay, let's get started. Goal for this sprint is to get push notifications working and fix the checkout crashes people keep reporting." },
+        { "t": "00:21", "speaker": "Daniel Okafor", "text": "The checkout crash is on Android only. I think it's the payment sheet failing when the network drops mid-request. I can reproduce it, so I'd say two days to fix and test." },
+        { "t": "00:48", "speaker": "Maya Chen", "text": "Good. That one is the priority. Anything blocking you?" },
+        { "t": "01:02", "speaker": "Daniel Okafor", "text": "Not blocking, but I need the final copy for the notification messages before I can finish the push work. Sara, are those ready?" },
+        { "t": "01:19", "speaker": "Sara Lindqvist", "text": "Not yet. I have three drafts, but I'm waiting on feedback from legal about the wording for promotional notifications. I'll chase them today." },
+        { "t": "01:41", "speaker": "Maya Chen", "text": "Let's say copy is due Wednesday. If legal is late, we ship with transactional notifications only, like order updates, and add promotions next sprint." },
+        { "t": "02:05", "speaker": "Daniel Okafor", "text": "That works for me. Splitting it like that is lower risk anyway." },
+        { "t": "02:20", "speaker": "Sara Lindqvist", "text": "I also want to redesign the order tracking screen. Users are confused about the difference between Packed and Shipped." },
+        { "t": "02:44", "speaker": "Maya Chen", "text": "I agree it's confusing, but I don't think it fits this sprint. Can you put together a quick mockup so we can review it at the next planning meeting?" },
+        { "t": "03:03", "speaker": "Sara Lindqvist", "text": "Sure. I'll have a mockup by next Monday." },
+        { "t": "03:15", "speaker": "Daniel Okafor", "text": "One more thing. Our test coverage on the cart module is really low. I'd like to add tests while I'm fixing the crash." },
+        { "t": "03:34", "speaker": "Maya Chen", "text": "Fine, but keep it to the cart module. Don't let it grow into a big refactor." },
+        { "t": "03:48", "speaker": "Daniel Okafor", "text": "Agreed. Cart module only." },
+        { "t": "04:00", "speaker": "Maya Chen", "text": "Great. To recap: Daniel fixes the Android checkout crash and adds cart tests, Sara gets copy approved by Wednesday and brings a tracking screen mockup on Monday, and I'll update the roadmap and tell support the fix is coming. Thanks, everyone." }
+      ]
+    },
+    {
+      "id": "m2",
+      "title": "Discovery Call: Lumen CRM with Harbor Freight Logistics",
+      "type": "sales",
+      "date": "2026-09-16",
+      "durationMinutes": 28,
+      "participants": ["Priya Nair", "Tom Reyes", "Jess Albrecht"],
+      "transcript": [
+        { "t": "00:00", "speaker": "Priya Nair", "text": "Thanks for making time, Tom and Jess. I'd love to start by understanding how your team tracks customer relationships today." },
+        { "t": "00:18", "speaker": "Tom Reyes", "text": "Honestly, it's a mix of spreadsheets and email. Our account managers each keep their own sheet, so nobody has the full picture." },
+        { "t": "00:40", "speaker": "Priya Nair", "text": "That's very common. What's the biggest problem it causes right now?" },
+        { "t": "00:52", "speaker": "Tom Reyes", "text": "Last quarter we lost a contract renewal because two people contacted the same client with different pricing. It was embarrassing and cost us about 200 thousand dollars a year." },
+        { "t": "01:20", "speaker": "Jess Albrecht", "text": "From the IT side, my concern is security and integrations. We use Microsoft 365 and a custom dispatch system, and the CRM would need to connect to both." },
+        { "t": "01:46", "speaker": "Priya Nair", "text": "We have a native Microsoft 365 integration, and our API handles custom systems. I can send documentation. Does your dispatch system have an API?" },
+        { "t": "02:08", "speaker": "Jess Albrecht", "text": "It does, but it's old and poorly documented. That's a risk." },
+        { "t": "02:22", "speaker": "Priya Nair", "text": "Understood. Our solutions engineer could do a technical review with you before you commit to anything." },
+        { "t": "02:40", "speaker": "Tom Reyes", "text": "What does pricing look like? We have about 40 account managers." },
+        { "t": "02:55", "speaker": "Priya Nair", "text": "For 40 seats on the annual plan it would be around 45 dollars per seat per month. I'll send a formal quote with the volume discount included." },
+        { "t": "03:15", "speaker": "Tom Reyes", "text": "That's within range, but I'd need to get approval from our CFO. She'll want a business case." },
+        { "t": "03:32", "speaker": "Priya Nair", "text": "I can help with that. I'll send a one-page ROI summary based on the renewal loss you mentioned. Can we schedule a technical review with Jess early next week?" },
+        { "t": "03:52", "speaker": "Jess Albrecht", "text": "Tuesday or Wednesday would work." },
+        { "t": "04:01", "speaker": "Priya Nair", "text": "Perfect. I'll send a calendar invite for Tuesday at 2 p.m. and the quote and ROI summary by Friday." }
+      ]
+    },
+    {
+      "id": "m3",
+      "title": "Customer Interview: Booking App for Photographers",
+      "type": "research",
+      "date": "2026-09-18",
+      "durationMinutes": 18,
+      "participants": ["Hannah Wu", "Carlos Mendes"],
+      "transcript": [
+        { "t": "00:00", "speaker": "Hannah Wu", "text": "Thanks for joining, Carlos. I'd like to learn how you handle client bookings as a freelance photographer. There are no wrong answers." },
+        { "t": "00:17", "speaker": "Carlos Mendes", "text": "Sure. Right now clients message me on Instagram or WhatsApp, and I go back and forth to agree on a date. It takes forever." },
+        { "t": "00:38", "speaker": "Hannah Wu", "text": "How many bookings do you handle in a typical month?" },
+        { "t": "00:44", "speaker": "Carlos Mendes", "text": "Around 15 to 20, mostly weddings and portrait sessions. Weddings are the hard ones because of deposits and contracts." },
+        { "t": "01:05", "speaker": "Hannah Wu", "text": "What's the most frustrating part of that process?" },
+        { "t": "01:12", "speaker": "Carlos Mendes", "text": "Chasing deposits. I've had people book a date, never pay, and then I've blocked that day for nothing. Twice last year I turned down other clients because of it." },
+        { "t": "01:40", "speaker": "Hannah Wu", "text": "Have you tried any booking tools?" },
+        { "t": "01:46", "speaker": "Carlos Mendes", "text": "I tried one, but it was built for salons. It didn't handle contracts, and the calendar couldn't block out travel time for destination weddings." },
+        { "t": "02:12", "speaker": "Hannah Wu", "text": "If you could change one thing, what would it be?" },
+        { "t": "02:20", "speaker": "Carlos Mendes", "text": "A booking link where the client picks a date, signs the contract, and pays the deposit in one go. If they don't pay, the date isn't held." },
+        { "t": "02:45", "speaker": "Hannah Wu", "text": "That's very helpful. I'll share these notes with the product team and follow up if we build a prototype. Would you be open to testing it?" },
+        { "t": "03:02", "speaker": "Carlos Mendes", "text": "Definitely. Send it my way." }
+      ]
+    },
+    {
+      "id": "m4",
+      "title": "Project Kickoff: Company Website Redesign",
+      "type": "kickoff",
+      "date": "2026-09-21",
+      "durationMinutes": 45,
+      "participants": ["Olivia Park", "Raj Patel", "Mei Tanaka", "Ben Fischer"],
+      "transcript": [
+        { "t": "00:00", "speaker": "Olivia Park", "text": "Welcome, everyone. This is the kickoff for the website redesign. The goal is to launch the new site by November 30, with a faster load time and a clearer story about what we do." },
+        { "t": "00:28", "speaker": "Ben Fischer", "text": "From the marketing side, our current bounce rate is above 65 percent. Most visitors leave the homepage without clicking anything. That's the number I'd like us to improve." },
+        { "t": "00:55", "speaker": "Olivia Park", "text": "Good. Let's make that a success metric: bounce rate under 45 percent within two months of launch. Raj, what's the technical situation?" },
+        { "t": "01:15", "speaker": "Raj Patel", "text": "The current site is on an old CMS that's slow and hard to update. I'd recommend moving to a modern framework with a headless CMS. It's more work up front but much easier for marketing to maintain." },
+        { "t": "01:48", "speaker": "Ben Fischer", "text": "My only concern is that we can edit pages ourselves without asking developers every time." },
+        { "t": "02:02", "speaker": "Raj Patel", "text": "That's exactly what a headless CMS gives you. I'll set up a demo so you can try it before we commit." },
+        { "t": "02:20", "speaker": "Mei Tanaka", "text": "On design, I'd like to start with the homepage and the pricing page, since those matter most. I'll need brand guidelines and the latest logo files." },
+        { "t": "02:42", "speaker": "Ben Fischer", "text": "I'll send those today. Heads up, the brand colors are being updated next month, so we might need to change the palette late." },
+        { "t": "03:05", "speaker": "Mei Tanaka", "text": "That's risky. Let's build the design with color variables so a palette change takes minutes, not days." },
+        { "t": "03:22", "speaker": "Olivia Park", "text": "Good plan. Budget-wise we have 40 thousand dollars total, including hosting for the first year. Raj, does that cover the development?" },
+        { "t": "03:42", "speaker": "Raj Patel", "text": "Probably, as long as we don't add a custom blog system. If we use the CMS's built-in blog, we stay within budget." },
+        { "t": "04:00", "speaker": "Olivia Park", "text": "Decision made: use the built-in blog. Now the timeline. Design drafts by October 10, development starts October 15, content freeze November 15, launch November 30." },
+        { "t": "04:30", "speaker": "Mei Tanaka", "text": "Design drafts by October 10 is tight, but doable if I get the brand files today." },
+        { "t": "04:45", "speaker": "Olivia Park", "text": "Let's recap the action items. Ben sends brand files today and writes the homepage copy by October 8. Raj builds the CMS demo by Friday. Mei delivers the design drafts by October 10. I'll set up a weekly check-in every Monday at 10 a.m." }
+      ]
+    }
+  ]
+}
