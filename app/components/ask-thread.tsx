@@ -27,7 +27,7 @@ export default function AskThread({ turns, open, pending, meetingId, onSuggest, 
           <p className="mb-1 text-meta font-medium">{turn.input.scope === "all" ? "All meetings" : "This meeting"}</p>
           <p className="text-base leading-6 whitespace-pre-wrap break-words">{turn.input.question}</p>
         </div>
-        <div aria-label="Assistant message" className="mr-auto w-fit max-w-[95%] rounded-xl bg-surface-raised px-3 py-2 text-foreground">
+        <div aria-label="Assistant message" className="mr-auto w-fit max-w-[95%] rounded-xl border border-border bg-surface px-3 py-2 text-foreground">
           {turn.status === "pending" ? <p className="text-base leading-6">Thinking...</p> : turn.status === "error" ? <>
             <p className="text-base leading-6 break-words">{turn.error}</p>
             <button type="button" disabled={pending} onClick={() => onRetry(turn.id)}

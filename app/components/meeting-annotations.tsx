@@ -1,14 +1,12 @@
 import type { Annotation } from "@/lib/interaction-schema";
-import EmptyPanel from "./empty-panel";
+import EmptyPanel, { SidebarSection } from "./empty-panel";
 import TimestampButton from "./timestamp-button";
 import TranscriptText from "./transcript-text";
-import { Panel } from "./ui";
 
 export default function MeetingAnnotations({ annotations, onJump }: { annotations: Annotation[]; onJump: (seconds: number) => void }) {
   if (!annotations.length) return <EmptyPanel title="Annotations" description="No annotations yet. Highlight a transcript line to save it here." />;
   return (
-    <Panel glass className="p-5 sm:p-7">
-      <h2 className="text-lg font-semibold">Annotations</h2>
+    <SidebarSection title="Annotations" count={annotations.length}>
       <ul className="mt-4 divide-y divide-border">
         {annotations.map((annotation) => (
           <li key={annotation.id} className="py-4 first:pt-0 last:pb-0">
@@ -20,6 +18,6 @@ export default function MeetingAnnotations({ annotations, onJump }: { annotation
           </li>
         ))}
       </ul>
-    </Panel>
+    </SidebarSection>
   );
 }

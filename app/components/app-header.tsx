@@ -18,8 +18,8 @@ export default function AppHeader() {
     window.addEventListener("keydown", focusSearch);
     return () => window.removeEventListener("keydown", focusSearch);
   }, [router]);
-  return <header className="glass sticky top-0 z-30 border-x-0 border-t-0">
-    <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-8">
+  return <header className="app-header glass sticky top-0 z-50 border-x-0 border-t-0">
+    <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 sm:px-8">
       <Link href="/" className="flex min-h-10 min-w-0 items-center gap-3 rounded-lg font-semibold">
         <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-accent text-on-accent"><Icon name="note" /></span>
         <span className="truncate">Meeting Notes</span>

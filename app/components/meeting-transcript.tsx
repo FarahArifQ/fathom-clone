@@ -7,6 +7,8 @@ import SearchField from "./search-field";
 import TimestampButton from "./timestamp-button";
 import TranscriptText from "./transcript-text";
 import { Tag } from "./ui";
+import SpeakerTimeline from "./speaker-timeline";
+import { speakerColor } from "@/lib/speakers";
 
 export default function MeetingTranscript({ meeting, targetSeconds, annotations, pending, onHighlight, onJump }: {
   meeting: Meeting; targetSeconds?: number; annotations: Annotation[]; pending: Set<string>;
@@ -48,6 +50,7 @@ export default function MeetingTranscript({ meeting, targetSeconds, annotations,
   return (
     <section aria-label="Transcript">
       <div className="border-b border-border p-5 sm:p-7">
+        {meeting.durationMinutes >= 30 && meeting.transcript.length > 0 && <SpeakerTimeline meeting={meeting} speaker={speaker} onSpeaker={setSpeaker} onJump={onJump} />}
         <div className="flex flex-col gap-4 xl:flex-row">
           <SearchField label="Search transcript" value={query} onChange={setQuery} />
           <div className="min-w-0 xl:w-48">
@@ -90,9 +93,9 @@ export default function MeetingTranscript({ meeting, targetSeconds, annotations,
           const saving = pending.has(`highlight:${seconds}`);
           return (
             <li key={`${seconds}-${segment.speaker}`} id={`t-${seconds}`} tabIndex={-1} hidden={!visibleLines.has(segment)}
-              className={`scroll-mt-6 py-6 ${flashing && seconds === targetSeconds ? "bg-accent-soft" : ""}`}>
+              className={`scroll-mt-6 py-6 ${flashing && seconds === targetSeconds ? "transcript-target" : ""}`}>
               <div className="mb-2 flex items-center justify-between gap-3">
-                <span className="text-base font-semibold text-foreground">{segment.speaker}</span>
+                <span className="text-base font-semibold" style={{ color: speakerColor(meeting, segment.speaker) }}>{segment.speaker}</span>
                 <TimestampButton seconds={seconds} onJump={onJump} />
               </div>
               <p className="text-base leading-7 text-secondary"><TranscriptText text={segment.text} onJump={onJump} /></p>
