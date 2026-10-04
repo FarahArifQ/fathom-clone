@@ -2,11 +2,13 @@
 
 A minimal Fathom-inspired app focused on the experience after a meeting, built with Next.js, TypeScript, React, and Tailwind CSS.
 
-## Current build: step 3 — AI summaries
+## Current build: step 4 — meeting interactions
 
 - `/` reads meetings, attendees, and transcript segments from Supabase on the server, newest first, with participant initials and transcript line counts. Local search matches titles, participants, and transcript text.
 - `/meetings/[id]` has Summary and Transcript tabs with local transcript search and a speaker filter. Desktop shows meeting details alongside the transcript; mobile uses a Details tab. Timestamp links navigate to passages.
-- Summary shows saved TL;DR and Decisions / Key points sections, or a Generate summary button with loading and error states. Action items and chapters appear in Details with links to source passages. Unassigned tasks show Needs owner. Annotations remain an honest empty state.
+- Summary shows saved TL;DR and Decisions / Key points sections, or a Generate summary button with loading and error states. Action items and chapters appear in Details. Unassigned tasks show Needs owner.
+- Timestamp buttons open Transcript, clear its filters, scroll to the matching passage, and highlight it for two seconds. Timestamps within summary text are clickable too; jumping to a time between lines selects the preceding line.
+- Action-item checkboxes persist completion through `PATCH /api/action-items/[id]`. Each transcript line has a Highlight button that saves its text as an annotation through `POST /api/meetings/[id]/annotations`. Saved annotations appear beside the meeting and on transcript lines, including after reload. Both routes validate input and use Supabase only on the server.
 - Supabase reads run at request time. The application does not import the seed JSON or connect to Supabase during builds.
 
 ## Database setup
@@ -62,11 +64,13 @@ Run `npm install`, then `npm run dev` and open http://localhost:3000. Verify wit
 - Keep the meeting library and transcript review flow to make the post-meeting experience usable first.
 - Use an original, responsive layout rather than a pixel-for-pixel Fathom copy.
 - Label all fictional meetings as seed data; transcripts are excerpts rather than full-length recordings.
-- Cut live meeting bots and recording to focus on reviewing existing transcripts. Timestamp links scroll to text instead of playing audio.
+- Cut live meeting bots and recording to focus on reviewing existing transcripts. Timestamp buttons scroll to text instead of playing audio.
 - Cut calendar sync because meeting capture is outside this assignment's scope.
 - Omit authentication as requested; this is a shared demo dataset.
 - Persist fictional seed data in Supabase and read it server-side; keep search and transcript filtering local for this small library. Defer database search and Q&A to subsequent build steps.
-- Generate real summaries, action items, and chapters on demand; leave annotation editing and action-item completion for later steps.
+- Generate real summaries, action items, and chapters on demand; persist task completion and transcript highlights without adding annotation editing.
+- Cut Team Calls, Deals, and CRM sync because this one-day build focuses on the core meeting review experience.
+- Keep Ask for questions that arise while reading a meeting. Its planned answers must cite transcript moments, plainly state when information is absent, and address only the question asked. Ask is not implemented in step 4.
 - Use a single teal accent and one system font, with a list-based library and mobile section tabs for reviewing meetings on narrow screens.
 - Use system fonts so the initial deployment does not require downloading fonts at build time.
 

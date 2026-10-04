@@ -2,22 +2,26 @@
 
 import { useEffect, useState, type KeyboardEvent } from "react";
 import { type Meeting } from "@/lib/meetings";
-import EmptyPanel from "./empty-panel";
 import MeetingTranscript from "./meeting-transcript";
 import ParticipantAvatar from "./participant-avatar";
-import type { MeetingSummary } from "@/lib/summary-schema";
+import type { Annotation, SavedSummary } from "@/lib/interaction-schema";
 import MeetingSummaryPanel from "./meeting-summary";
 import MeetingInsights from "./meeting-insights";
 import { useMeetingSummary } from "./use-meeting-summary";
+import { useMeetingInteractions } from "./use-meeting-interactions";
+import MeetingAnnotations from "./meeting-annotations";
 
 const tabs = ["Summary", "Transcript", "Details"] as const;
 type Tab = typeof tabs[number];
 
-export default function MeetingWorkspace({ meeting, initialSummary }: { meeting: Meeting; initialSummary: MeetingSummary | null }) {
+export default function MeetingWorkspace({ meeting, initialSummary, initialAnnotations }: {
+  meeting: Meeting; initialSummary: SavedSummary | null; initialAnnotations: Annotation[];
+}) {
   const [active, setActive] = useState<Tab>("Summary");
   const [contentTab, setContentTab] = useState<"Summary" | "Transcript">("Summary");
   const [target, setTarget] = useState<{ seconds: number; visit: number } | null>(null);
-  const { summary, generating, error, generate } = useMeetingSummary(meeting.id, initialSummary);
+  const { summary, generating, error, generate, updateAction } = useMeetingSummary(meeting.id, initialSummary);
+  const interactions = useMeetingInteractions(meeting.id, initialAnnotations, updateAction);
 
   useEffect(() => {
     const desktop = window.matchMedia("(min-width: 1024px)");
@@ -34,8 +38,10 @@ export default function MeetingWorkspace({ meeting, initialSummary }: { meeting:
   }
 
   function jumpToTranscript(seconds: number) {
+    const line = meeting.transcript.findLast((segment) => segment.startSeconds <= seconds) ?? meeting.transcript[0];
+    if (!line) return;
     selectTab("Transcript");
-    setTarget((current) => ({ seconds, visit: (current?.visit ?? 0) + 1 }));
+    setTarget((current) => ({ seconds: line.startSeconds, visit: (current?.visit ?? 0) + 1 }));
   }
 
   function navigateTabs(event: KeyboardEvent<HTMLDivElement>) {
@@ -52,6 +58,7 @@ export default function MeetingWorkspace({ meeting, initialSummary }: { meeting:
 
   return (
     <div className="grid items-start gap-7 lg:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)]">
+      {interactions.error && <p role="alert" className="rounded-lg border border-slate-300 bg-stone-50 p-4 text-sm leading-6 lg:col-span-2">{interactions.error}</p>}
       <div className="min-w-0">
         <div role="tablist" aria-label="Meeting sections" onKeyDown={navigateTabs} className="mb-5 flex gap-1 rounded-xl border border-slate-200 bg-white p-1.5">
           {tabs.map((tab) => (
@@ -63,10 +70,11 @@ export default function MeetingWorkspace({ meeting, initialSummary }: { meeting:
         </div>
         <div className={`${active === "Details" ? "hidden lg:block" : ""} overflow-hidden rounded-xl border border-slate-200 bg-white`}>
           <div id="panel-Summary" role="tabpanel" aria-labelledby="tab-Summary" tabIndex={0} hidden={contentTab !== "Summary"}>
-            <MeetingSummaryPanel summary={summary} generating={generating} error={error} onGenerate={generate} />
+            <MeetingSummaryPanel summary={summary} generating={generating} error={error} onGenerate={generate} onJump={jumpToTranscript} />
           </div>
           <div id="panel-Transcript" role="tabpanel" aria-labelledby="tab-Transcript" tabIndex={0} hidden={contentTab !== "Transcript"}>
-            <MeetingTranscript key={target?.visit ?? 0} meeting={meeting} targetSeconds={target?.seconds} />
+            <MeetingTranscript key={target?.visit ?? 0} meeting={meeting} targetSeconds={target?.seconds}
+              annotations={interactions.annotations} pending={interactions.pending} onHighlight={interactions.highlight} onJump={jumpToTranscript} />
           </div>
         </div>
       </div>
@@ -77,8 +85,8 @@ export default function MeetingWorkspace({ meeting, initialSummary }: { meeting:
             {meeting.participants.map((name) => <li key={name} className="flex items-center gap-3 text-sm text-slate-700"><ParticipantAvatar name={name} /><span>{name}</span></li>)}
           </ul>
         </header>
-        <MeetingInsights summary={summary} onJump={jumpToTranscript} />
-        <EmptyPanel title="Annotations" description="No annotations yet. Notes and highlights are not connected in this seed demo." />
+        <MeetingInsights summary={summary} onJump={jumpToTranscript} pending={interactions.pending} onComplete={interactions.completeAction} />
+        <MeetingAnnotations annotations={interactions.annotations} onJump={jumpToTranscript} />
       </aside>
     </div>
   );

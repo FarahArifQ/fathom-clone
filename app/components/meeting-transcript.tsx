@@ -1,18 +1,27 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
-import { formatTimestamp, type Meeting } from "@/lib/meetings";
+import { type Meeting } from "@/lib/meetings";
+import type { Annotation } from "@/lib/interaction-schema";
 import SearchField from "./search-field";
+import TimestampButton from "./timestamp-button";
+import TranscriptText from "./transcript-text";
 
-export default function MeetingTranscript({ meeting, targetSeconds }: { meeting: Meeting; targetSeconds?: number }) {
+export default function MeetingTranscript({ meeting, targetSeconds, annotations, pending, onHighlight, onJump }: {
+  meeting: Meeting; targetSeconds?: number; annotations: Annotation[]; pending: Set<string>;
+  onHighlight: (segment: Meeting["transcript"][number]) => void; onJump: (seconds: number) => void;
+}) {
   const [query, setQuery] = useState("");
   const [speaker, setSpeaker] = useState("");
   const speakerId = useId();
+  const [flashing, setFlashing] = useState(targetSeconds !== undefined);
   useEffect(() => {
     if (targetSeconds === undefined) return;
     const element = document.getElementById(`t-${targetSeconds}`);
     element?.scrollIntoView({ block: "center" });
     element?.focus({ preventScroll: true });
+    const timer = window.setTimeout(() => setFlashing(false), 2000);
+    return () => window.clearTimeout(timer);
   }, [targetSeconds]);
   const speakers = [...new Set(meeting.transcript.map((line) => line.speaker))];
   const results = meeting.transcript.filter((line) =>
@@ -37,14 +46,30 @@ export default function MeetingTranscript({ meeting, targetSeconds }: { meeting:
       <ol className="divide-y divide-slate-100 px-5 sm:px-7">
         {results.map((segment) => {
           const seconds = segment.startSeconds;
-          const timestamp = formatTimestamp(seconds);
+          const notes = annotations.filter((annotation) => annotation.timestamp_seconds === seconds);
+          const highlighted = notes.some((annotation) => annotation.type === "highlight");
+          const saving = pending.has(`highlight:${seconds}`);
           return (
-            <li key={seconds} id={`t-${seconds}`} tabIndex={-1} className="scroll-mt-6 py-6 target:bg-teal-50 focus:bg-teal-50">
+            <li key={`${seconds}-${segment.speaker}`} id={`t-${seconds}`} tabIndex={-1}
+              className={`scroll-mt-6 py-6 transition-colors ${flashing && seconds === targetSeconds ? "bg-teal-100" : ""}`}>
               <div className="mb-2 flex items-center justify-between gap-3">
                 <span className="text-sm font-semibold text-slate-900">{segment.speaker}</span>
-                <a href={`#t-${seconds}`} aria-label={`Jump to ${timestamp}`} className="inline-flex min-h-8 items-center rounded px-2 text-xs text-teal-800 tabular-nums hover:bg-teal-50">{timestamp}</a>
+                <TimestampButton seconds={seconds} onJump={onJump} />
               </div>
-              <p className="text-sm leading-7 text-slate-700">{segment.text}</p>
+              <p className="text-sm leading-7 text-slate-700"><TranscriptText text={segment.text} onJump={onJump} /></p>
+              <div className="mt-3 flex flex-wrap items-center gap-3 text-xs">
+                <button type="button" onClick={() => onHighlight(segment)} disabled={highlighted || saving}
+                  aria-label={`${highlighted ? "Highlighted" : "Highlight"} ${segment.speaker}'s transcript line`}
+                  className="min-h-9 rounded px-2 font-medium text-teal-800 hover:bg-teal-50 disabled:cursor-default disabled:text-slate-600">
+                  {saving ? "Saving highlight…" : highlighted ? "Highlighted" : "Highlight"}
+                </button>
+                {highlighted && <span role="status" className="rounded border border-teal-700 bg-teal-50 px-2 py-1 font-medium text-teal-900">Saved highlight</span>}
+              </div>
+              {notes.filter((note) => note.type !== "highlight" || note.note !== segment.text).map((note) => (
+                <p key={note.id} className="mt-3 border-l-2 border-teal-700 pl-3 text-sm leading-7 text-slate-700">
+                  <span className="font-medium capitalize">{note.type}: </span><TranscriptText text={note.note} onJump={onJump} />
+                </p>
+              ))}
             </li>
           );
         })}
