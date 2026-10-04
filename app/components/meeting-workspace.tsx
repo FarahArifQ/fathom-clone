@@ -71,7 +71,7 @@ export default function MeetingWorkspace({ meeting, initialSummary, initialAnnot
             </button>
           ))}
         </div>
-        <div className={`${active === "Details" ? "hidden lg:block" : ""} overflow-hidden rounded-xl border border-slate-200 bg-white`}>
+        <div className={`${active === "Details" ? "hidden lg:block" : ""} overflow-clip rounded-xl border border-slate-200 bg-white`}>
           <div id="panel-Summary" role="tabpanel" aria-labelledby="tab-Summary" tabIndex={0} hidden={contentTab !== "Summary"}>
             <MeetingSummaryPanel summary={summary} generating={generating} error={error} onGenerate={generate} onJump={jumpToTranscript} />
           </div>
