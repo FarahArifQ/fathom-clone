@@ -9,7 +9,7 @@
     @apply bg-stone-50 font-sans text-slate-900;
   }
 
-  a:focus-visible {
+  :is(a, button, input, select, [tabindex]):focus-visible {
     @apply rounded outline-2 outline-offset-4 outline-teal-700;
   }
 }

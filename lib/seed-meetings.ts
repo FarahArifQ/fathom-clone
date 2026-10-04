@@ -1,6 +1,7 @@
 import seed from "@/data/seed-meetings.json";
 
 export const meetings = seed.meetings;
+export type Meeting = typeof meetings[number];
 
 export function formatMeetingDate(date: string) {
   return new Intl.DateTimeFormat("en-US", {

@@ -1,9 +1,9 @@
 export default function EmptyPanel({ title, description }: { title: string; description: string }) {
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-6">
+    <section className="rounded-xl border border-slate-200 bg-white p-5 sm:p-7">
       <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
-      <div className="mt-5 rounded-xl border border-dashed border-slate-200 bg-stone-50 px-5 py-7">
-        <p className="text-sm leading-6 text-slate-500">{description}</p>
+      <div className="mt-5 border-t border-slate-100 pt-5">
+        <p className="text-sm leading-6 text-slate-600">{description}</p>
       </div>
     </section>
   );

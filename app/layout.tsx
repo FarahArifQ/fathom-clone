@@ -20,7 +20,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             </Link>
             <nav aria-label="Main navigation" className="flex items-center gap-5 text-sm">
               <Link href="/" className="font-medium text-teal-800">Library</Link>
-              <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-800">Seed demo</span>
             </nav>
           </div>
         </header>

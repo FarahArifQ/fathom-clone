@@ -4,9 +4,9 @@ A minimal Fathom-inspired app focused on the experience after a meeting, built w
 
 ## Current build: step 1
 
-- `/` shows four fictional meetings from `data/seed-meetings.json`, newest first.
-- `/meetings/[id]` shows attendees and transcript excerpts. Timestamp links navigate to passages.
-- Summary and action-item panels show empty states. No AI output is mocked.
+- `/` shows four fictional meetings from `data/seed-meetings.json` in a list, newest first, with participant initials and transcript line counts. Local search matches titles, participants, and transcript text.
+- `/meetings/[id]` has Summary and Transcript tabs with local transcript search and a speaker filter. Desktop shows meeting details alongside the transcript; mobile uses a Details tab. Timestamp links navigate to passages.
+- Summary, action-item, and annotation panels show honest empty states. No AI output is mocked.
 - No environment variables, Supabase connection, or external services are needed for this step.
 
 Run `npm install`, then `npm run dev` and open http://localhost:3000. Verify with `npm run lint` and `npm run build`.
@@ -19,7 +19,9 @@ Run `npm install`, then `npm run dev` and open http://localhost:3000. Verify wit
 - Cut live meeting bots and recording to focus on reviewing existing transcripts. Timestamp links scroll to text instead of playing audio.
 - Cut calendar sync because meeting capture is outside this assignment's scope.
 - Omit authentication as requested; this is a shared demo dataset.
-- Defer summaries, action items, chapters, annotations, search, and Q&A to subsequent build steps. AI panels explicitly show that generation is not connected yet.
+- Keep local seed search and transcript filters available now; defer database search and Q&A to subsequent build steps.
+- Defer summaries, action items, chapters, and annotation editing to subsequent build steps. Empty panels explicitly show that these features are not connected yet.
+- Use a single teal accent and one system font, with a list-based library and mobile section tabs for reviewing meetings on narrow screens.
 - Use system fonts so the initial deployment does not require downloading fonts at build time.
 
 ## Approved backend plan (not implemented)
