@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { formatMeetingDate, type Meeting } from "@/lib/seed-meetings";
+import { formatMeetingDate, type Meeting } from "@/lib/meetings";
 import ParticipantAvatar from "./participant-avatar";
 import SearchField from "./search-field";
 
@@ -47,9 +47,9 @@ export default function MeetingLibrary({ meetings }: { meetings: Meeting[] }) {
         </ul>
       ) : (
         <div className="rounded-xl border border-slate-200 bg-white px-6 py-14 text-center">
-          <h2 className="text-lg font-semibold">No meetings found</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">Try another title, participant name, or phrase from a transcript.</p>
-          <button onClick={() => setQuery("")} className="mt-5 min-h-11 rounded-lg bg-teal-800 px-5 text-sm font-medium text-white hover:bg-teal-900">Clear search</button>
+          <h2 className="text-lg font-semibold">{term ? "No meetings found" : "No meetings yet"}</h2>
+          <p className="mt-2 text-sm leading-6 text-slate-600">{term ? "Try another title, participant name, or phrase from a transcript." : "Your meeting library is empty."}</p>
+          {term && <button onClick={() => setQuery("")} className="mt-5 min-h-11 rounded-lg bg-teal-800 px-5 text-sm font-medium text-white hover:bg-teal-900">Clear search</button>}
         </div>
       )}
     </section>

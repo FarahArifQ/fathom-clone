@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
-import { timestampSeconds, type Meeting } from "@/lib/seed-meetings";
+import { formatTimestamp, type Meeting } from "@/lib/meetings";
 import SearchField from "./search-field";
 
 export default function MeetingTranscript({ meeting }: { meeting: Meeting }) {
@@ -30,12 +30,13 @@ export default function MeetingTranscript({ meeting }: { meeting: Meeting }) {
       </div>
       <ol className="divide-y divide-slate-100 px-5 sm:px-7">
         {results.map((segment) => {
-          const seconds = timestampSeconds(segment.t);
+          const seconds = segment.startSeconds;
+          const timestamp = formatTimestamp(seconds);
           return (
             <li key={seconds} id={`t-${seconds}`} className="scroll-mt-6 py-6 target:bg-teal-50">
               <div className="mb-2 flex items-center justify-between gap-3">
                 <span className="text-sm font-semibold text-slate-900">{segment.speaker}</span>
-                <a href={`#t-${seconds}`} aria-label={`Jump to ${segment.t}`} className="inline-flex min-h-8 items-center rounded px-2 text-xs text-teal-800 tabular-nums hover:bg-teal-50">{segment.t}</a>
+                <a href={`#t-${seconds}`} aria-label={`Jump to ${timestamp}`} className="inline-flex min-h-8 items-center rounded px-2 text-xs text-teal-800 tabular-nums hover:bg-teal-50">{timestamp}</a>
               </div>
               <p className="text-sm leading-7 text-slate-700">{segment.text}</p>
             </li>

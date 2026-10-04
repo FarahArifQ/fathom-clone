@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type KeyboardEvent } from "react";
-import { type Meeting } from "@/lib/seed-meetings";
+import { type Meeting } from "@/lib/meetings";
 import EmptyPanel from "./empty-panel";
 import MeetingTranscript from "./meeting-transcript";
 import ParticipantAvatar from "./participant-avatar";
