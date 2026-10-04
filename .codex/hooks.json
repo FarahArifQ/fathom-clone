@@ -1,0 +1,24 @@
+{
+    "hooks":  {
+                  "UserPromptSubmit":  [
+                                           {
+                                               "hooks":  [
+                                                             {
+                                                                 "command":  "node .codex/capture.mjs FarahArifQ",
+                                                                 "type":  "command"
+                                                             }
+                                                         ]
+                                           }
+                                       ],
+                  "Stop":  [
+                               {
+                                   "hooks":  [
+                                                 {
+                                                     "command":  "node .codex/capture.mjs FarahArifQ",
+                                                     "type":  "command"
+                                                 }
+                                             ]
+                               }
+                           ]
+              }
+}
