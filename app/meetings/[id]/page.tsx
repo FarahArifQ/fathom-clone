@@ -26,7 +26,7 @@ export default async function MeetingPage({ params, searchParams }: PageProps<"/
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 pt-8 pb-28 sm:px-8 sm:pt-10">
-      <Link href="/" className="inline-flex min-h-11 items-center gap-2 text-meta font-medium text-accent"><Icon name="arrow" className="size-5 rotate-180" />Back to library</Link>
+      <Link href="/library" className="inline-flex min-h-11 items-center gap-2 text-meta font-medium text-accent"><Icon name="arrow" className="size-5 rotate-180" />Back to library</Link>
       <header className="mt-5 mb-8">
         <h1 className="break-words">{meeting.title}</h1>
         <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-3 text-meta font-medium text-secondary">

@@ -4,11 +4,11 @@ import { useEffect, useRef } from "react";
 import type { AskTurn } from "./use-ask";
 import TranscriptCitation from "./transcript-citation";
 
-const questions = ["What decisions were agreed?", "What tasks have an owner?", "What deadlines were discussed?"];
+const meetingQuestions = ["What decisions were agreed?", "What tasks have an owner?", "What deadlines were discussed?"];
 
-export default function AskThread({ turns, open, pending, meetingId, onSuggest, onRetry, onJump }: {
-  turns: AskTurn[]; open: boolean; pending: boolean; meetingId: string;
-  onSuggest: (question: string) => void; onRetry: (id: number) => void; onJump: (seconds: number) => void;
+export default function AskThread({ turns, open, pending, meetingId, questions = meetingQuestions, onSuggest, onRetry, onJump }: {
+  turns: AskTurn[]; open: boolean; pending: boolean; meetingId?: string; questions?: readonly string[];
+  onSuggest: (question: string) => void; onRetry: (id: number) => void; onJump?: (seconds: number) => void;
 }) {
   const thread = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -18,7 +18,7 @@ export default function AskThread({ turns, open, pending, meetingId, onSuggest, 
     <div ref={thread} role="log" aria-label="Ask conversation" aria-live="polite" aria-relevant="additions text"
       className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-3 py-4">
       {!turns.length && <div className="space-y-2" aria-label="Suggested questions">
-        <p className="mb-3 text-base leading-6 text-secondary">Ask about the transcript. Answers cite their sources.</p>
+        <p className="mb-3 text-base leading-6 text-secondary">Ask about {meetingId ? "the transcript" : "your meeting transcripts"}. Answers cite their sources.</p>
         {questions.map((question) => <button key={question} type="button" onClick={() => onSuggest(question)}
           className="min-h-10 w-full rounded-lg border border-border px-3 py-2 text-left text-meta font-medium text-accent hover:bg-accent-soft">{question}</button>)}
       </div>}
@@ -37,7 +37,7 @@ export default function AskThread({ turns, open, pending, meetingId, onSuggest, 
             {turn.answer.context_truncated && <p className="mt-2 text-meta leading-5 text-secondary">Transcript context was trimmed to fit. This answer covers only the included text.</p>}
             {turn.answer.citations.length > 0 && <ul aria-label="Answer sources" className="mt-2 flex flex-wrap gap-2">
               {turn.answer.citations.map((citation) => <li key={citation.id} className="min-w-0 max-w-full">
-                <TranscriptCitation citation={citation} currentMeetingId={meetingId} onJump={onJump} compact />
+                <TranscriptCitation citation={citation} currentMeetingId={meetingId} onJump={onJump} compact={!!meetingId} />
               </li>)}
             </ul>}
           </>}

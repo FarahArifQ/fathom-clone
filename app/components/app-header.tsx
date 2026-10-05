@@ -2,30 +2,31 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Icon from "./ui-icon";
+import AppBrand from "./app-brand";
+import LandingNav from "./landing-nav";
 
 export default function AppHeader() {
   const router = useRouter();
+  const pathname = usePathname();
   useEffect(() => {
     const focusSearch = (event: KeyboardEvent) => {
       if (!(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== "k") return;
       event.preventDefault();
       const search = document.getElementById("meeting-search");
       if (search) search.focus();
-      else router.push("/#meeting-search");
+      else router.push("/library#meeting-search");
     };
     window.addEventListener("keydown", focusSearch);
     return () => window.removeEventListener("keydown", focusSearch);
   }, [router]);
+  if (pathname === "/") return <LandingNav />;
   return <header className="app-header glass sticky top-0 z-50 border-x-0 border-t-0">
     <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 sm:px-8">
-      <Link href="/" className="flex min-h-10 min-w-0 items-center gap-3 rounded-lg font-semibold">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-accent text-on-accent"><Icon name="note" /></span>
-        <span className="truncate">Meeting Notes</span>
-      </Link>
+      <AppBrand />
       <nav aria-label="Main navigation">
-        <Link href="/#meeting-search" onClick={(event) => {
+        <Link href="/library#meeting-search" onClick={(event) => {
           const search = document.getElementById("meeting-search");
           if (search) { event.preventDefault(); search.focus(); }
         }} className="button button-ghost">
